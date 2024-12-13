@@ -49,7 +49,7 @@ int main()
 		cout << res;
 
 		//part 5 save matrix
-		output_res_to_file("../saved_answers/(" + to_string(n) + ", " + to_string(k) + ", " + to_string(d) + ")/code.txt", res);
+		//output_res_to_file("../saved_answers/(" + to_string(n) + ", " + to_string(k) + ", " + to_string(d) + ")/code.txt", res);
 	}
 	return 0;
 }

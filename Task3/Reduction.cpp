@@ -18,7 +18,7 @@ void output_res_to_file(string file_name, string text);  // printing results to 
 int reduction(int n, int k, int d, int want_check_matrix)
 {
 	//part 0 -- zeroing
-	string res = "[]"; 
+	string res = "["; //ToDo change to "[]"
 	pair<long long, string> res_Dimacs;
 	string ans = "";
 	string answer_file_name = "../saved_answers/(" + to_string(n) + ", " + to_string(k) + ", " + to_string(d) + ")";
@@ -46,10 +46,12 @@ int reduction(int n, int k, int d, int want_check_matrix)
 
 		//part 2.2 -- create condition, that sum in a row smaller then d // Σ[j = 1..n-k](a(step)_i1.i2..i(step)_j) ⩽ d - step
 		ans = generate_inequalities(n, k, d, step);
-		if (res != "[]")
+		if (res != "[")
 			res = res.substr(0, res.size() - 1) + ",\n";
-		res = res.substr(0, res.size() - 1) + ans.substr(2, ans.size() - 1) + "]";
+		res += ans.substr(2, ans.size() - 1);
 	}
+	if (res == "[")
+		res += "]";
 
 	//part 3 save results
 	//part 3.1 create directory
