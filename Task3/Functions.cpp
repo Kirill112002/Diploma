@@ -18,7 +18,7 @@ int switch_cout_equi = 0;
 
 int vars_count()
 {
-	return cur_fresh_var;
+	return cur_fresh_var - 1;
 }
 
 void set0()
@@ -30,14 +30,14 @@ void set0()
 	inequivs = empt_vec;
 }
 
-void allLtoN()
+static void allLtoN()
 {
-	cout << "ltoN\n";
+	cout << "ltoN:\n";
 	for (auto i : ltoN)
 		cout << i.first << " " << i.second << "\n";
 }
 
-string make_var(int step, string i, int j)
+static string make_var(int step, string i, int j)
 {
 	string a = "a" + to_string(step) + "_" + i + "_" + to_string(j);
 	if (ltoN.find(a) == ltoN.end())
@@ -74,13 +74,9 @@ string check_m(int n, int k)
 			cin >> sj;
 			string a;
 			if (j <= k)
-			{
 				a = make_var(0, to_string(i), j);
-			}
 			else
-			{
 				a = make_var(1, to_string(i), j - k + 1);
-			}
 			if ((sj + 1)%2)
 				conjunkt += "-";
 			conjunkt += to_string(ltoN[a]) + "], [";
@@ -408,3 +404,38 @@ string generate_equi(int n, int k, int d, int step)
 	return res;
 }
 
+pair<long long, string> res_to_Dimacs(string res)
+{
+	long long counter = 0;
+	stringstream ss(" " + res);
+	string conjunkt;
+	string ans = "";
+	while (!ss.eof()) {
+		getline(ss, conjunkt, ']');
+		if (conjunkt != "")
+		{
+			conjunkt = conjunkt.substr(3, conjunkt.length() - 3);
+			stringstream sc(conjunkt);
+			string word;
+			while (getline(sc, word, ','))
+			{
+				//cout << word;
+				ans += word;
+			}
+			counter++;
+			//cout << "\n";
+			ans += "\n";
+		}
+	}
+	return { counter, ans };
+}
+
+void output_res_to_file(string file_name, string text)
+{
+	ofstream out;
+	out.open(file_name);
+	if (out.is_open()) {
+		out << text;
+	}
+	out.close();
+}
