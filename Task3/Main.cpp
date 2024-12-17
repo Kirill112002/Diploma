@@ -1,8 +1,6 @@
 #include <iostream>;
 #include <fstream>;
 #include <string>;
-#include <vector>;
-#include <map>;
 
 using namespace::std;
 
@@ -10,7 +8,7 @@ int reduction(int n, int k, int d, int want_check_matrix);		// create CNF
 bool check_inequivs(string str);								// check minimal distances for all inequivs we have //ToDo (can be removed)
 bool check_enumeration(string str, int n, int k, int d);		// check minimal distance all combinations
 string print_matrix(int n, int k);								// create result matrix //ToDo rename
-void output_res_to_file(string file_name, string text);  // printing results to files
+void output_res_to_file(string file_name, string text);			// printing results to files
 
 int main()
 {
@@ -21,7 +19,6 @@ int main()
 	while (cin >> n >> k >> d >> want_check_matrix) {
 		//part 1 make CNF
 		reduction(n, k, d, want_check_matrix);
-
 		cout << "\nIf results are ready, press Enter\n";
 		getline(cin, str);
 		getline(cin, str);
@@ -32,7 +29,6 @@ int main()
 			getline(in, str);
 		}
 		in.close();
-
 		//part 3 check results //ToDo move to another file
 		if (check_inequivs(str))
 		{
@@ -49,7 +45,7 @@ int main()
 		cout << res;
 
 		//part 5 save matrix
-		//output_res_to_file("../saved_answers/(" + to_string(n) + ", " + to_string(k) + ", " + to_string(d) + ")/code.txt", res);
+		output_res_to_file("../saved_answers/(" + to_string(n) + ", " + to_string(k) + ", " + to_string(d) + ")/code.txt", res);
 	}
 	return 0;
 }
