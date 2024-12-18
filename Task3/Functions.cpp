@@ -11,7 +11,7 @@ map<string, int> ltoN;
 int cur_fresh_var = 1;
 vector<string> inequivs;
 vector<int> answer_from_sat;
-int switch_cout_mknf = 0, switch_cout_equi = 0;
+int switch_cout_mknf = 1, switch_cout_equi = 0;
 
 //return current number of variables in our CNF-formula
 static int get_vars_count()
@@ -123,7 +123,7 @@ static string inequality_to_cnf(int n, int k, int d, int step, string i_main)
 }
 
 //creates 
-string generate_cnf_inequalities(int n, int k, int d, int step)// x1 + x2 + x3 >= d
+string generate_cnf_inequalities(int n, int k, int d, int step, bool verification_matrix_mode)// x1 + x2 + x3 >= d
 {
 	std::vector<bool> v(k);
 	std::fill(v.begin(), v.begin() + step, true);
@@ -140,6 +140,18 @@ string generate_cnf_inequalities(int n, int k, int d, int step)// x1 + x2 + x3 >
 		inequivs.push_back(make_printable_inequality(n - k, d, step, i_main));
 		if (switch_cout_mknf)
 			cout << inequivs[inequivs.size() - 1] << "\n";
+		if (verification_matrix_mode)// && d > (step + 1))
+		{
+			/*
+			for (int j = d - step - 1; j > 0; j--)
+			{
+				ans = inequality_to_cnf(n, k, d - j, step, i_main);
+				res = res.substr(0, res.size() - 1) + ",\n" + ans.substr(1, ans.size() - 1);
+			}*/
+			ans = inequality_to_cnf(n, k, step + 1, step, i_main);
+			res = res.substr(0, res.size() - 1) + ",\n" + ans.substr(1, ans.size() - 1);
+
+		}
 		ans = inequality_to_cnf(n, k, d, step, i_main);
 		res = res.substr(0, res.size() - 1) + ",\n" + ans.substr(1, ans.size() - 1);
 	} while (std::prev_permutation(v.begin(), v.end()));
