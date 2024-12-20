@@ -12,11 +12,17 @@ int cur_fresh_var = 1;
 vector<string> inequivs;
 vector<int> answer_from_sat;
 int switch_cout_mknf = 1, switch_cout_equi = 0;
+string new_vars = "[]";
 
 //return current number of variables in our CNF-formula
 static int get_vars_count()
 {
 	return cur_fresh_var - 1;
+}
+
+string get_new_vars()
+{
+	return new_vars;
 }
 
 //print on screen pairs of number and variable a(step)_i..i(step)_j correspondes to this number
@@ -51,7 +57,6 @@ static string make_var(int step, string i, int j)
 		ltoN.insert({ a_i_j, cur_fresh_var });
 		cur_fresh_var++;
 	}
-
 	return a_i_j;
 }
 
@@ -68,6 +73,27 @@ string first_step_variables(int n, int k)
 
 
 //CREATE CNF
+
+//
+string symmetry_breaking(int n, int k, int d)
+{
+	string ans = "[]", res = "[]";
+	//step 1 вес хотя бы одной из строк равен d
+	
+	//res = res.substr(0, ans.size() - 1) + ans + "]";
+
+	//step 2 лексикографическая сортировка столбцов 
+
+	//experimental maybe FATAL but try
+	for (int j = 1; j <= n - k; j++)
+		if(j <= d - 1)
+			ans = ans.substr(0, ans.size() - 1) + "[" + to_string(ltoN[make_var(1, "1", j)]) + "], ]";
+		else
+			ans = ans.substr(0, ans.size() - 1) + "[-" + to_string(ltoN[make_var(1, "1", j)]) + "], ]";
+	res = ans.substr(0, ans.size() - 3) + "]";
+
+	return res;
+}
 
 
 //create printable version of inequality
@@ -140,7 +166,7 @@ string generate_cnf_inequalities(int n, int k, int d, int step, bool verificatio
 		inequivs.push_back(make_printable_inequality(n - k, d, step, i_main));
 		if (switch_cout_mknf)
 			cout << inequivs[inequivs.size() - 1] << "\n";
-		if (verification_matrix_mode)// && d > (step + 1))
+		if (verification_matrix_mode && (d > (step + 1)))
 		{
 			/*
 			for (int j = d - step - 1; j > 0; j--)
@@ -238,7 +264,8 @@ string generate_equi(int n, int k, int d, int step)
 			res = res.substr(0, res.size() - 1) + ",\n" + ans.substr(1, ans.size() - 1);
 		}
 	} while (std::prev_permutation(v.begin(), v.end()));
-	return res;
+	new_vars = new_vars.substr(0, new_vars.size() - 1) + ",\n" + res.substr(2, res.size() - 1);
+	return "";
 }
 
 //check_right_part //toDo correct leftpartchecking
