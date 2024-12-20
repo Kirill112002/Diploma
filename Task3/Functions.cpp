@@ -12,17 +12,11 @@ int cur_fresh_var = 1;
 vector<string> inequivs;
 vector<int> answer_from_sat;
 int switch_cout_mknf = 1, switch_cout_equi = 0;
-string new_vars = "[]";
 
 //return current number of variables in our CNF-formula
 static int get_vars_count()
 {
 	return cur_fresh_var - 1;
-}
-
-string get_new_vars()
-{
-	return new_vars;
 }
 
 //print on screen pairs of number and variable a(step)_i..i(step)_j correspondes to this number
@@ -264,8 +258,7 @@ string generate_equi(int n, int k, int d, int step)
 			res = res.substr(0, res.size() - 1) + ",\n" + ans.substr(1, ans.size() - 1);
 		}
 	} while (std::prev_permutation(v.begin(), v.end()));
-	new_vars = new_vars.substr(0, new_vars.size() - 1) + ",\n" + res.substr(2, res.size() - 1);
-	return "";
+	return res;
 }
 
 //check_right_part //toDo correct leftpartchecking
