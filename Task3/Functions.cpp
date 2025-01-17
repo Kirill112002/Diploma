@@ -7,20 +7,24 @@ using namespace std;
 using namespace PBLib;
 
 //int n, k, d; //toDo add in new commit
-map<string, int> ltoN;
+map<string, long long> ltoN;
 int cur_fresh_var = 1;
 vector<string> inequivs;
 vector<int> answer_from_sat;
-int switch_cout_mknf = 1, switch_cout_equi = 0;
+int switch_cout_mknf = 0, switch_cout_equi = 0;
 
 //return current number of variables in our CNF-formula
-static int get_vars_count()
+int get_vars_count()
 {
 	return cur_fresh_var - 1;
 }
 
+void set_vars_count(int cur)
+{
+	cur_fresh_var = cur;
+}
 //print on screen pairs of number and variable a(step)_i..i(step)_j correspondes to this number
-static void print_all_LtoN()
+void print_all_LtoN()
 {
 	cout << "ltoN:\n";
 	for (auto i : ltoN)
@@ -28,14 +32,17 @@ static void print_all_LtoN()
 }
 
 //prepairing program to work with new code
-void set0(int n1, int k1, int d1)
+void set0(int n1, int k1, int d1, int mode)
 {
-	map<string, int> empt_map;
+	map<string, long long> empt_map;
 	vector<string> empt_vec_str;
 	vector<int> empt_vec_int;
-	cur_fresh_var = 1;
-	ltoN = empt_map;
-	inequivs = empt_vec_str;
+	if (mode != 1)
+	{
+		cur_fresh_var = 1;
+		ltoN = empt_map;
+		inequivs = empt_vec_str;
+	}
 	answer_from_sat = empt_vec_int;
 	//n = n1;
 	//k = k1;
@@ -74,17 +81,17 @@ string symmetry_breaking(int n, int k, int d)
 	string ans = "[]", res = "[]";
 	//step 1 вес хотя бы одной из строк равен d
 	
-	//res = res.substr(0, ans.size() - 1) + ans + "]";
-
-	//step 2 лексикографическая сортировка столбцов 
-
 	//experimental maybe FATAL but try
 	for (int j = 1; j <= n - k; j++)
-		if(j <= d - 1)
+		if (j <= d - 1)
 			ans = ans.substr(0, ans.size() - 1) + "[" + to_string(ltoN[make_var(1, "1", j)]) + "], ]";
 		else
 			ans = ans.substr(0, ans.size() - 1) + "[-" + to_string(ltoN[make_var(1, "1", j)]) + "], ]";
 	res = ans.substr(0, ans.size() - 3) + "]";
+
+	//step 2 лексикографическая сортировка столбцов 
+
+
 
 	return res;
 }
@@ -367,25 +374,30 @@ bool check_enumeration(string str, int n, int k, int d)
 		used_i = cur_vec.first;
 		count = cur_vec.second;
 
-		a_i_j = "a" + to_string(count) + "_";
+		//a_i_j = "a" + to_string(count) + "_";
+		string i_main = "";
 		for (int i = 1; i <= k; i++)
 			if (used_i[i - 1])
 			{
-				a_i_j += to_string(i) + ".";
+				i_main += to_string(i) + ".";
 				cout << "1 + ";
 			}
 			else
 				cout << "0 + ";
 		
-		a_i_j = a_i_j.substr(0, a_i_j.size()-1) + "_";
+		i_main = i_main.substr(0, i_main.size()-1);
 
 		cout << "| ";
 		summ = 0;
 		for (int j = 1; j <= n - k; j++)
 		{
-			if (answer_from_sat[ltoN[a_i_j + to_string(j)]])
-				summ++;
-			cout << answer_from_sat[ltoN[a_i_j + to_string(j)]] << " + ";
+			if (answer_from_sat.size() <= ltoN[make_var(count, i_main, j)])
+				cout << "0 + ";
+			else {
+				if (answer_from_sat[ltoN[make_var(count, i_main, j)]])
+					summ++;
+				cout << answer_from_sat[ltoN[make_var(count, i_main, j)]] << " + ";
+			}
 		}
 		cout << "= " << summ + count << " >= " << d << "\n";
 
@@ -445,7 +457,7 @@ string res_to_Dimacs(string res)
 				ans += disjunct;
 			}
 			counter++;
-			ans += "\n";
+			ans += " 0\n";
 		}
 	}
 	return "p cnf " + to_string(get_vars_count()) + " " + to_string(counter) + "\n" + ans;

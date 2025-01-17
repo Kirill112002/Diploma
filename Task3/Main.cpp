@@ -9,16 +9,17 @@ bool check_inequivs(string str);								// check minimal distances for all inequ
 bool check_enumeration(string str, int n, int k, int d);		// check minimal distance all combinations
 string print_matrix(int n, int k);								// create result matrix //ToDo rename
 void output_res_to_file(string file_name, string text);			// printing results to files
+int get_vars_count();
 
 int main()
 {
-	int n, k, d, want_check_matrix;
+	int n, k, d, mode;// mode 0 -- без модификаторов, mode 1 -- продолжение прошлого запроса(d увеличилось), mode 2 -- проверка существующего решения(toDo)
 	string str;
 	ifstream in;
 	ofstream out;
-	while (cin >> n >> k >> d >> want_check_matrix) {
+	while (cin >> n >> k >> d >> mode) {
 		//part 1 make CNF
-		reduction(n, k, d, want_check_matrix);
+		reduction(n, k, d, mode);
 		cout << "\nIf results are ready, press Enter\n";
 		getline(cin, str);
 		getline(cin, str);
@@ -46,6 +47,7 @@ int main()
 
 		//part 5 save matrix
 		output_res_to_file("../saved_answers/(" + to_string(n) + ", " + to_string(k) + ", " + to_string(d) + ")/code.txt", res);
+		cout << get_vars_count();
 	}
 	return 0;
 }

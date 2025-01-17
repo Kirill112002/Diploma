@@ -6,9 +6,13 @@ from pysat.solvers import Solver
 from pysat.solvers import Glucose3
 from pysat.solvers import Cadical195
 from pysat.solvers import Gluecard3
-
+import time
+start_time = time.time()
 print('reading clauses')
 from myconfig import *
+
+read_time = time.time() - start_time
+print("--- reading %s seconds ---" % (read_time))
 
 print('clauses have been read\n\n')
 
@@ -26,11 +30,19 @@ print('clauses have been read\n\n')
 
 print('\n\n\n')
 c = Cadical195()
+g = Glucose3()
 for clause in clauses:
     c.add_clause(clause)
 #ans = [1, 2, -3, 4, 5, 6, -7, -8, 9, 10, -11, 12, -13, -14, 15, 16, -17, 18, -19, 20, 21, 22, -23, -24, -25, 26, -27, 28, 29, -30]
 print(c.solve())
 
+# print('reading clauses part 2')
+# from myconfig2_extra import *
+
+# print('clauses2 have been read\n\n')
+# for clause in clauses2:
+#     c.add_clause(clause)
+# print(c.solve())
 file1 = open("../Task3/sat_result.txt", "w") 
 
 xs = c.get_model()
@@ -50,11 +62,18 @@ if (zs != None):
     c_proof = '[' + ', '.join(str(x) for x in zs) + ']'
 else:
     c_proof = '[]'
-file1.write(s)
+if(s != None):
+    file1.write(s)
+else:
+    file1.write("[]")
 file1.close()
 print(xs)
 print(ys)
 print(zs)
+
+
+solve_time = time.time() - read_time - start_time
+print("--- solving %s seconds ---" % (solve_time))
 # file2 = open(dir_name, "w")
 # file2.write(s)
 # file2.close()
