@@ -75,6 +75,79 @@ string first_step_variables(int n, int k)
 
 //CREATE CNF
 
+//create new variables
+static string make_var_sb(string type, int id, int step)// id -- identifier number of left vector
+{
+	string sb = "sb_" + type + to_string(id) + "_" + to_string(step);
+	if (ltoN.find(sb) == ltoN.end())
+	{
+		ltoN.insert({ sb, cur_fresh_var });
+		cur_fresh_var++;
+	}
+	return sb;
+}
+
+string make_sb_conjunkt(int aprev, int x, int y, int a)
+{
+	return "[" + to_string(aprev) + ", " + to_string(x) + ", " + to_string(y) + ", " + to_string(a) + "]";
+}
+
+string make_sb_conjunkt(int aprev, int acurr)
+{
+	return "[" + to_string(aprev) + ", " + to_string(acurr) + "]";
+}
+
+//create_variable_c
+string create_variable_c(int x, int y, int i)
+{
+	int ai = ltoN[make_var_sb("c", x, i)];
+	int xi = ltoN[make_var(1, to_string(i), x)];
+	int yi = ltoN[make_var(1, to_string(i), y)];
+	int aiprev = ltoN[make_var_sb("c", x, i - 1)];
+	string res = make_sb_conjunkt(-aiprev, xi, yi, ai) + ", " + make_sb_conjunkt(-aiprev, xi, -yi, -ai) + ", "
+		+ make_sb_conjunkt(-aiprev, -xi, yi, -ai) + ", " + make_sb_conjunkt(-aiprev, -xi, -yi, ai) + ", " + make_sb_conjunkt(aiprev, -ai);
+	return res;
+}
+
+//create_variable_d
+string create_variable_d(int x, int y, int i)
+{
+	int bi = ltoN[make_var_sb("d", x, i)];
+	int xi = ltoN[make_var(1, to_string(i), x)];
+	int yi = ltoN[make_var(1, to_string(i), y)];
+	int aiprev = ltoN[make_var_sb("c", x, i - 1)];
+	string res = make_sb_conjunkt(-aiprev, xi, -yi, bi) + ", " + make_sb_conjunkt(-aiprev, xi, yi, -bi) + ", "
+		+ make_sb_conjunkt(-aiprev, -xi, yi, -bi) + ", " + make_sb_conjunkt(-aiprev, -xi, -yi, -bi) + ", " + make_sb_conjunkt(aiprev, -bi);
+	return res;
+}
+
+//create_variable_d
+string create_condition_e(int x, int y, int length)
+{
+	string res = "[]", ans = "[]";
+	for (int i = 1; i <= length; i++)
+	{
+		int bi = ltoN[make_var_sb("d", x, i)];
+		ans = ans.substr(0, ans.size() - 1) + to_string(bi) + ", ]";
+	}
+	res = ans.substr(0, ans.size() - 3) + "]";//fix ans = "[]"
+	return res;
+}
+
+string create_condition_vector_x_smaller_vector_y(int x, int y, int length)
+{
+	string res = "[]", create_c = "[]", create_d = "[]";
+	create_c = "[" + to_string(ltoN[make_var_sb("c", x, 0)]) + "]]";
+	for (int i = 1; i <= length; i++)
+		create_c = create_c.substr(0, create_c.size() - 1) + ", " + create_variable_c(x, y, i) + "]";
+	create_d = create_variable_d(x, y, 1) + "]";
+	for (int i =2; i <= length; i++)
+		create_d = create_d.substr(0, create_d.size() - 1) + ", " + create_variable_d(x, y, i) + "]";
+	res = create_c.substr(0, create_c.size() - 1) + ",\n" + create_d.substr(0, create_d.size() - 1) + ",\n" + create_condition_e(x, y, length);
+
+	return res;
+}
+
 //
 string symmetry_breaking(int n, int k, int d)
 {
@@ -83,15 +156,19 @@ string symmetry_breaking(int n, int k, int d)
 	
 	//experimental maybe FATAL but try
 	for (int j = 1; j <= n - k; j++)
-		if (j <= d - 1)
-			ans = ans.substr(0, ans.size() - 1) + "[" + to_string(ltoN[make_var(1, "1", j)]) + "], ]";
-		else
+		if (j <= (n - k) - d + 1)
 			ans = ans.substr(0, ans.size() - 1) + "[-" + to_string(ltoN[make_var(1, "1", j)]) + "], ]";
+		else
+			ans = ans.substr(0, ans.size() - 1) + "[" + to_string(ltoN[make_var(1, "1", j)]) + "], ]";
 	res = ans.substr(0, ans.size() - 3) + "]";
 
 	//step 2 лексикографическая сортировка столбцов 
-
-
+	//ans = "[";//fix 
+	//for (int j = 1; j < n - k; j++)
+	//{
+	//	ans = ans.substr(0, ans.size() - 1) + create_condition_vector_x_smaller_vector_y(j, j + 1, k) + ",\n]";
+	//}
+	//res = res.substr(0, res.size() - 1) + ",\n" + ans.substr(0, ans.size() - 3) + "]";
 
 	return res;
 }
