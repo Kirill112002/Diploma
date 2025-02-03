@@ -11,43 +11,63 @@ string print_matrix(int n, int k);								// create result matrix //ToDo rename
 void output_res_to_file(string file_name, string text);			// printing results to files
 int get_vars_count();
 
+bool check_input(int n, int k, int d)
+{
+	if (n < k || n < d || n == 0 || k == 0)
+	{
+		cout << "incorrect input\n";
+		return false;
+	}
+	if (n == k)
+	{
+		if (d <= 1)
+			cout << "it's Identity matrix of size n\n";
+		else
+			cout << "it's Identity matrix of size n. Current d  cannot be bigger than 1\n";
+		return false;
+	}
+	return true;
+}
 int main()
 {
 	int n, k, d, mode;// mode 0 -- без модификаторов, mode 1 -- продолжение прошлого запроса(d увеличилось), mode 2 -- проверка существующего решения(toDo)
 	string str;
 	ifstream in;
 	ofstream out;
-	while (cin >> n >> k >> d >> mode) {
-		//part 1 make CNF
-		reduction(n, k, d, mode);
-		cout << "\nIf results are ready, press Enter\n";
-		getline(cin, str);
-		getline(cin, str);
-
-		//part 2 get results from SAT
-		in.open("sat_result.txt");
-		if (in.is_open()) {
-			getline(in, str);
-		}
-		in.close();
-		//part 3 check results //ToDo move to another file
-		if (check_inequivs(str))
+	while (cin >> n >> k >> d){//} >> mode) {
+		if (check_input(n, k, d))
 		{
-			if (check_enumeration(str, n, k, d))
-				cout << "It's really work correct!\n";
+			//part 1 make CNF
+			reduction(n, k, d, 0); // mode);
+			cout << "\nIf results are ready, press Enter\n";
+			getline(cin, str);
+			getline(cin, str);
+
+			//part 2 get results from SAT
+			in.open("sat_result.txt");
+			if (in.is_open()) {
+				getline(in, str);
+			}
+			in.close();
+			//part 3 check results //ToDo move to another file
+			if (str != "\n" && check_inequivs(str))
+			{
+				if (check_enumeration(str, n, k, d))
+					cout << "It's really work correct!\n";
+				else
+					cout << "Oh, my bad, it's not work!(\n";
+			}
 			else
-				cout << "Oh, my bad, it's not work!(\n";
+				cout << "something wrong!!!\n";
+
+			//part 4 create code matrix
+			string res = print_matrix(n, k);
+			cout << res;
+
+			//part 5 save matrix
+			output_res_to_file("../saved_answers/(" + to_string(n) + ", " + to_string(k) + ", " + to_string(d) + ")/code.txt", res);
+			cout << get_vars_count();
 		}
-		else
-			cout << "something wrong!!!\n";
-
-		//part 4 create code matrix
-		string res = print_matrix(n, k);
-		cout << res;
-
-		//part 5 save matrix
-		output_res_to_file("../saved_answers/(" + to_string(n) + ", " + to_string(k) + ", " + to_string(d) + ")/code.txt", res);
-		cout << get_vars_count();
 	}
 	return 0;
 }
