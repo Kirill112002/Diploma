@@ -34,11 +34,12 @@ int reduction(int n, int k, int d, int mode)
 	if (mode == 2)
 		res = check_m(n, k);
 	print_all_LtoN();
-	res = symmetry_breaking(n, k, d);
+	res = symmetry_breaking(n, k, d);// +=
 
 	//cout << res << "\n";
 	
 	//part 2 -- create conditions
+	int cur_con = 4;
 	for (int step = 1; d > step && step <= k; step++)
 	{
 		cout << "step" << step << ":\n";
@@ -47,12 +48,21 @@ int reduction(int n, int k, int d, int mode)
 		//part 2.1 -- create new variables and equivalent conditions for them // a(step)_i1i2..i(step)_j ≡ a(step-1)_i1i2..i(step-1)_j ⊕ a1_i(step)_j
 		if (step > 1)
 		{
-			ans = generate_equi(n, k, d, step);
+			//ans = generate_equi(n, k, d, step);
+			if(step <= cur_con)//cur_con
+				ans = generate_equi(n - k, k, d, step);
+			else
+				ans = generate_equi(n - k, step, d, step);
+
 			res = res.substr(0, res.size() - 1) + ",\n" + ans.substr(2, ans.size() - 1);
 		}
 
 		//part 2.2 -- create condition, that sum in a row smaller then d // Σ[j = 1..n-k](a(step)_i1.i2..i(step)_j) ≥ d - step
-		ans = generate_cnf_inequalities(n, k, d, step, verification_matrix_mode);
+		//ans = generate_cnf_inequalities(n, k, d, step, verification_matrix_mode);
+		if (step <= cur_con)
+			ans = generate_cnf_inequalities(n - k, k, d, step, verification_matrix_mode);
+		else
+			ans = generate_cnf_inequalities(n - k, step, d, step, verification_matrix_mode);
 		if (res != "[]")
 			res = res.substr(0, res.size() - 1) + ",\n]";
 		cout << ans << "\n\n";
@@ -65,8 +75,8 @@ int reduction(int n, int k, int d, int mode)
 	}
 	else
 	{
-		output_res_to_file("../py/myconfig.py", "dir_name = \"" + answer_file_name + "/sat_result.txt\"\nclauses = " + res);
-		output_res_to_file("../py/myconfig2_extra.py", "clauses2 = []");
+		output_res_to_file("../py/myconfig.py", "dir_name = \"" + answer_file_name + "/sat_result.txt\"\nclauses = " + res);//myconfig.py
+		//output_res_to_file("../py/myconfig2_extra.py", "clauses2 = []");
 	}
 	//verification_matrix();
 	
