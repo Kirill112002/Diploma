@@ -28,19 +28,33 @@ bool check_input(int n, int k, int d)
 	}
 	return true;
 }
+void prepare_file()
+{
+	ofstream out;
+	out.open("sat_result.txt");
+	if (out.is_open()) {
+		out << "WAITING SAT";
+	}
+	out.close();
+}
 int main()
 {
 	int n, k, d, mode;// mode 0 -- без модификаторов, mode 1 -- продолжение прошлого запроса(d увеличилось), mode 2 -- проверка существующего решения(toDo)
 	string str;
 	ifstream in;
 	ofstream out;
-	while (cin >> n >> k >> d){//} >> mode) {
+	while (cin >> n >> k >> d)
+	{
+		//} >> mode) {
 		if (check_input(n, k, d))
 		{
+			//prepare_file();
 			//part 1 make CNF
-			reduction(n, k, d, 0); // mode);
+			reduction(n, k, d, 0);// , mode);
 			cout << "\nIf results are ready, press Enter\n";
 			getline(cin, str);
+
+			read_sat_res:
 			getline(cin, str);
 
 			//part 2 get results from SAT
@@ -49,24 +63,41 @@ int main()
 				getline(in, str);
 			}
 			in.close();
+			if (str == "WAITING SAT")
+			{
+				cout << "results aren't ready\n";
+				goto read_sat_res;
+			}
+			bool flag = false;
 			//part 3 check results //ToDo move to another file
-			if (str != "\n" && check_inequivs(str))
+			if (str != "UNSAT" && check_inequivs(str))
 			{
 				if (check_enumeration(str, n, k, d))
+				{
 					cout << "It's really work correct!\n";
+					flag = true;
+				}
 				else
 					cout << "Oh, my bad, it's not work!(\n";
+
 			}
 			else
 				cout << "something wrong!!!\n";
 
-			//part 4 create code matrix
+			//remove after test
 			string res = print_matrix(n, k);
 			cout << res;
+			
+			if (flag)
+			{
+				//part 4 create code matrix
+				string res = print_matrix(n, k);
+				cout << res;
 
-			//part 5 save matrix
-			output_res_to_file("../saved_answers/(" + to_string(n) + ", " + to_string(k) + ", " + to_string(d) + ")/code.txt", res);
-			cout << get_vars_count();
+				//part 5 save matrix
+				output_res_to_file("../saved_answers/(" + to_string(n) + ", " + to_string(k) + ", " + to_string(d) + ")/code.txt", res);
+				cout << get_vars_count();
+			}
 		}
 	}
 	return 0;
