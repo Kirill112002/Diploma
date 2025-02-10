@@ -130,7 +130,9 @@ string create_condition_e(int x, int y, int length)
 		int bi = ltoN[make_var_sb("d", x, i)];
 		ans = ans.substr(0, ans.size() - 1) + to_string(bi) + ", ]";
 	}
-	res = ans.substr(0, ans.size() - 3) + "]";//fix ans = "[]"
+	int ai = ltoN[make_var_sb("c", x, length)];
+	ans = ans.substr(0, ans.size() - 1) + to_string(ai) + "]";
+	res = ans;//fix ans = "[]"
 	return res;
 }
 
@@ -163,12 +165,15 @@ string symmetry_breaking(int n, int k, int d)
 	res = ans.substr(0, ans.size() - 3) + "]";
 
 	//step 2 лексикографическая сортировка столбцов 
-	//ans = "[";//fix 
-	//for (int j = 1; j < n - k; j++)
-	//{
-	//	ans = ans.substr(0, ans.size() - 1) + create_condition_vector_x_smaller_vector_y(j, j + 1, k) + ",\n]";
-	//}
-	//res = res.substr(0, res.size() - 1) + ",\n" + ans.substr(0, ans.size() - 3) + "]";
+	if (n - k >= 2)
+	{
+		ans = "[";//fix 
+		for (int j = 1; j < n - k; j++)
+		{
+			ans = ans.substr(0, ans.size() - 1) + create_condition_vector_x_smaller_vector_y(j, j + 1, k) + ",\n]";
+		}
+		res = res.substr(0, res.size() - 1) + ",\n" + ans.substr(0, ans.size() - 3) + "]";
+	}
 
 	return res;
 }
@@ -190,13 +195,13 @@ static string make_printable_inequality(int jmax, int d, int step, string i)// x
 }
 
 //transform inequality to cnf form (inequalities on step (step)), n1 = n - k
-static string inequality_to_cnf(int n, int k, int d, int step, string i_main)
+static string inequality_to_cnf(int n, int k, int d, int step, string i_main)// in last upd n = n-k, k switchable
 {
 	PB2CNF pb2cnf;
-	vector<int64_t> weights(n - k, 1);
-	vector<int> literals(n - k);
+	vector<int64_t> weights(n, 1);
+	vector<int> literals(n);
 	string a_i_j;
-	for (int j = 1; j <= n - k; j++)
+	for (int j = 1; j <= n; j++)
 	{
 		a_i_j = make_var(step, i_main, j);
 		literals[j - 1] = ltoN[a_i_j];
@@ -241,7 +246,8 @@ string generate_cnf_inequalities(int n, int k, int d, int step, bool verificatio
 				i_main += to_string(i + 1);
 			}
 		}
-		inequivs.push_back(make_printable_inequality(n - k, d, step, i_main));
+		//inequivs.push_back(make_printable_inequality(n - k, d, step, i_main));
+		inequivs.push_back(make_printable_inequality(n, d, step, i_main));
 		if (switch_cout_mknf)
 			cout << inequivs[inequivs.size() - 1] << "\n";
 		if (verification_matrix_mode && (d > (step + 1)))
@@ -316,7 +322,7 @@ static string adding_new_xor_variable(int newLet, int let1, int let2)//equi(введ
 
 }
 
-string generate_equi(int n, int k, int d, int step)
+string generate_equi(int n, int k, int d, int step)// in last update n became n - k, k now switch-able
 {
 	std::vector<bool> v(k);
 	std::fill(v.begin(), v.begin() + step, true);
@@ -334,7 +340,8 @@ string generate_equi(int n, int k, int d, int step)
 			}
 		}
 		last = last.substr(1, last.length() - 1);
-		for (int j = 1; j <= n - k; j++)
+		//for (int j = 1; j <= n - k; j++)
+		for (int j = 1; j <= n; j++)
 		{
 			if (switch_cout_equi)
 				cout << make_equi(make_var(step, i_main + "." + last, j), make_var(step - 1, i_main, j), make_var(1, last, j)) << "\n";
@@ -445,6 +452,8 @@ bool check_enumeration(string str, int n, int k, int d)
 	int count = 0, summ = 0;
 	pair<vector<int>, int> cur_vec;
 	string a_i_j;
+	int answer = 0;
+	string anslines = "";
 	for (int h = 0; h < pow(2, k) - 1; h++)
 	{
 		cur_vec = next_vec(used_i, count);
@@ -453,38 +462,59 @@ bool check_enumeration(string str, int n, int k, int d)
 
 		//a_i_j = "a" + to_string(count) + "_";
 		string i_main = "";
+		string line = "";
 		for (int i = 1; i <= k; i++)
 			if (used_i[i - 1])
 			{
 				i_main += to_string(i) + ".";
 				cout << "1 + ";
+				line += "1";
 			}
 			else
+			{
 				cout << "0 + ";
-		
-		i_main = i_main.substr(0, i_main.size()-1);
+				line += "0";
+			}
+
+		i_main = i_main.substr(0, i_main.size() - 1);
 
 		cout << "| ";
+		line += "| ";
 		summ = 0;
 		for (int j = 1; j <= n - k; j++)
 		{
 			if (answer_from_sat.size() <= ltoN[make_var(count, i_main, j)])
+			{
 				cout << "0 + ";
+				line += "0 + ";
+			}
 			else {
 				if (answer_from_sat[ltoN[make_var(count, i_main, j)]])
 					summ++;
 				cout << answer_from_sat[ltoN[make_var(count, i_main, j)]] << " + ";
+				line += to_string(answer_from_sat[ltoN[make_var(count, i_main, j)]]) + " + ";
 			}
 		}
 		cout << "= " << summ + count << " >= " << d << "\n";
+		line += "= " + to_string(summ + count) + " >= " + to_string(d) + "\n";
+
 
 		if (summ + count < d)
 		{
-			return false;
+			answer++;
+			anslines += line;
+			//return false;
 		}
 	}
 	//all enumerations(except enumerate with all zeros) checked 
-	return true;
+	cout << answer << "\n";
+	if (anslines == "")
+		return true;
+	else
+	{
+		cout << anslines;
+		return false;
+	}
 }
 
 
